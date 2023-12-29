@@ -1,3 +1,4 @@
+
 import copy
 import numpy as np
 import torch
@@ -5,11 +6,11 @@ import torch.nn as nn
 from tqdm import tqdm
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-#model_path = '/kaggle/working/model.pt'
+from Early_stopping import EarlyStopping
 
-def train_model(model, train_dataset, val_dataset, n_epochs=1, learning_rate=0.1, patience=5):
+def train_model(model, train_dataset, val_dataset,model_path,device, n_epochs=1, learning_rate=0.001, patience=3):
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.01, patience=patience, verbose=True)
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.001, patience=patience, verbose=True)
     criterion = nn.L1Loss(reduction='sum')
     model_best_wts = copy.deepcopy(model.state_dict())
     delta = 0
@@ -48,7 +49,7 @@ def train_model(model, train_dataset, val_dataset, n_epochs=1, learning_rate=0.1
 
         print(f"Train Loss : {train_loss:.2f} | Val Loss : {val_loss:.2f}")
 
-        if (epoch + 1) % 5 == 0:
+        if (epoch + 1) % 2 == 0:
             early_stopping(val_loss, model)
 
         scheduler.step(val_loss)  # Update learning rate based on validation loss
